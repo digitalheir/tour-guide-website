@@ -84,5 +84,5 @@ test:
 production:
   <<: *default
   database: tour_guide_production
-  username: tour_guide
-  password: <%= ENV['tour_guide_DATABASE_PASSWORD'] %>
+  username: postgres
+  password: moforepo
