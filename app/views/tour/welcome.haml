@@ -1,0 +1,24 @@
+%h1#im-here Show me around
+
+=form_tag({controller: "tour", action: "generate"}, {method: "post", class: "form-prefs"}) do
+  #welcome-map
+  #when
+    %h2#between Between
+    -#TODO datetime not supported in most browsers
+    #start-container
+      =text_field(:tour, :str_start_time)
+    #and and
+    #end-container
+      =text_field(:tour, :str_end_time)
+  #options-btn
+    %span#plus +
+    -#and…
+  #btn-go-container
+    =submit_tag("Let's go", :id => 'btn-go')
+:javascript
+  var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
+      .setView([52.3747158,4.8986166], 15);
+  //L.tileLayer('http://a.tiles.mapbox.com/v3/MapID/4/52.09/5.12.png', {
+  //    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+  //    maxZoom: 18
+  //}).addTo(map);
