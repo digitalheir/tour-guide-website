@@ -18,6 +18,31 @@
 :javascript
   var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
       .setView([52.3747158,4.8986166], 15);
+
+  // Immediately start to locate
+  map.locate();
+
+  // Once we've got a position, zoom and center the map on it, and add a single marker.
+  map.on('locationfound', function(e) {
+      map.fitBounds(e.bounds);
+
+      myLayer.setGeoJSON({
+          type: 'Feature',
+          geometry: {
+              type: 'Point',
+              coordinates: [e.latlng.lng, e.latlng.lat]
+          },
+          properties: {
+              'title': 'Here I am!',
+              'marker-color': '#ff8888',
+              'marker-symbol': 'star'
+          }
+      });
+
+      // And hide the geolocation button
+      geolocate.parentNode.removeChild(geolocate);
+  });
+
   //L.tileLayer('http://a.tiles.mapbox.com/v3/MapID/4/52.09/5.12.png', {
   //    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
   //    maxZoom: 18
