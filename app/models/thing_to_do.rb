@@ -105,7 +105,7 @@ class ThingToDo
     if image_url
       "background-image: url(#{image_url})"
     else
-      # "background-color: #eee"
+      "background-color: #afafaf"
       nil
     end
   end
