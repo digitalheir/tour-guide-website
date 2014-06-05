@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
 gem 'haml'
-gem 'sprockets_better_errors'
+# gem 'sprockets_better_errors'
+# gem 'sprockets-rails', '2.11.0'
 
 gem 'chronic'
 
@@ -11,12 +12,13 @@ gem 'equivalent-xml'
 gem 'rdf-rdfxml'
 gem 'rdf-n3'
 gem 'rdf-turtle'
+gem 'geokit'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.0'
 gem 'pg'
 # Use SCSS for stylesheets
-gem 'sass-rails', '~> 4.0.3'
+gem 'sass-rails', '4.0.2'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .js.coffee assets and views

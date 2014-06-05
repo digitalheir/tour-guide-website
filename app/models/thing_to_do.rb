@@ -1,6 +1,11 @@
 require 'set'
 
 class ThingToDo
+  attr_accessor :start
+  attr_accessor :end
+  attr_accessor :latlng
+
+  attr_reader :uri
   attr_reader :lats
   attr_reader :longs
   attr_reader :production_titles
@@ -8,7 +13,12 @@ class ThingToDo
   attr_reader :venue_images
   attr_reader :event_images
 
-  def initialize()
+  # Run on ThingToDo.new
+  def initialize uri
+    @uri = uri
+    @start = nil
+    @end = nil
+    # Note that we use sets, so duplicate values are not added
     @lats = Set.new
     @longs = Set.new
     @venue_images = Set.new
@@ -17,46 +27,6 @@ class ThingToDo
     @event_titles = {}
   end
 
-  def self.handle_sparql_result(results)
-    events = {}
-    results.each do |result|
-      uri = result['event'].value #TODO these are SPARQL variables. Make ruby constants out of them
-      event = events[uri]
-      unless event
-        event = ThingToDo.new
-        events[uri] = event
-      end
-
-      if result['lat'] #TODO if not already exists
-        event.lats << Float(result['lat'].value)
-      end
-      if result['long']
-        event.longs << Float(result['long'].value)
-      end
-
-      if result['productionTitle']
-        event.add_production_title result['productionTitle']
-      end
-
-      if result['eventTitle']
-        event.add_event_title result['eventTitle']
-      end
-
-      # ah:AttachmentTypeAfbeelding [http]
-      # ah:AttachmentTypeVideo [http]
-      # ah:AttachmentTypeTwitter [http]
-      # ah:AttachmentTypeLink [http]
-      # ah:AttachmentTypeImage [http]
-      # ah:AttachmentTypeKML [http]
-      if result['venueImageUrl']
-        event.add_venue_image result['venueImageUrl']
-      end
-      if result['eventImageUrl']
-        event.add_event_image result['eventImageUrl']
-      end
-    end
-    return events
-  end
 
   def add_venue_image(url)
     @venue_images << url
@@ -84,13 +54,13 @@ class ThingToDo
     titles_for_lang << title
   end
 
-  def get_display_title lang
+  def get_display_title(lang)
     title = nil
     if event_titles.length > 0
-      title = get_title event_titles, lang
+      title = find_title event_titles, lang
     end
     if title == nil and production_titles.length > 0
-      title = get_title production_titles, lang
+      title = find_title production_titles, lang
     end
     title
   end
@@ -105,12 +75,12 @@ class ThingToDo
     if image_url
       "background-image: url(#{image_url})"
     else
-      "background-color: #afafaf"
+      'background-color: #afafaf'
       nil
     end
   end
 
-  def get_title map, lang
+  def find_title(map, lang)
     if map[lang] and map[lang].length > 0
       ApplicationHelper.sample(map[lang])
     else
@@ -126,9 +96,67 @@ class ThingToDo
           end
         end
       else
-        # No titles
+        # No title available in map
         nil
       end
     end
+  end
+
+  # Returns how long this activity will probably take, in seconds.
+  def projected_duration
+    30 * 60 # Hardcode 30 minutes for now
+  end
+
+  def have_time(from_time, until_time, travel_to, travel_from)
+    time_left = until_time - from_time
+    travel_to + projected_duration + travel_from <= time_left
+  end
+
+  def self.create_from_sparql_results(results)
+    events = {}
+    results.each do |result|
+      uri = result['event'].value
+      event = events[uri]
+      unless event
+        event = ThingToDo.new uri
+        events[uri] = event
+      end
+
+      if result['lat']
+        event.lats << Float(result['lat'].value)
+      end
+      if result['long']
+        event.longs << Float(result['long'].value)
+      end
+
+      if result['productionTitle']
+        event.add_production_title result['productionTitle']
+      end
+
+      if result['eventTitle']
+        event.add_event_title result['eventTitle']
+      end
+
+      if result['venueImageUrl']
+        event.add_venue_image result['venueImageUrl']
+      end
+      if result['eventImageUrl']
+        event.add_event_image result['eventImageUrl']
+      end
+      if !(event.end) & result['end']
+        event.end = Time.parse(result['end'].value)
+      end
+      if !(event.start) & result['start']
+        event.start = Time.parse(result['start'].value)
+      end
+    end
+
+    events.each do |_, event|
+      avg_lat = (event.lats.reduce { |sum, val| sum+val })/event.lats.length # average latitude
+      avg_long = (event.longs.reduce { |sum, val| sum+val })/event.longs.length # average longitude
+      event.latlng = Geokit::LatLng.new(avg_lat, avg_long)
+    end
+
+    return events
   end
 end

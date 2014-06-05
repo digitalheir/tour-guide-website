@@ -1,2 +1,7 @@
-- @tour.events.each do |event_uri, event|
-  =render partial: 'event', locals:{uri:event_uri, event:event}
+- @tour.each do |node|
+  - if node.class == TravelNode
+    %h1 Travel
+    =node.duration/60
+    minutes
+  - else
+    =render partial: 'event', locals:{uri:node.uri, event:node}

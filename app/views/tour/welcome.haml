@@ -4,6 +4,8 @@
   #welcome-map
   #when
     %h2#between Between
+    =hidden_field_tag :lat, '52.3747158'
+    =hidden_field_tag :long, '4.8986166'
     -#TODO datetime not supported in most browsers
     #start-container
       =text_field(:tour, :str_start_time)
@@ -21,10 +23,20 @@
 
   // Immediately start to locate
   map.locate();
+  //if (!navigator.geolocation) {
+  //    geolocate.innerHTML = 'Geolocation is not available';
+  //} else {
+  //    geolocate.onclick = function (e) {
+  //        e.preventDefault();
+  //        e.stopPropagation();
+  //        map.locate();
+  //    };
+  //}
 
   // Once we've got a position, zoom and center the map on it, and add a single marker.
   map.on('locationfound', function(e) {
-      map.fitBounds(e.bounds);
+      //map.fitBounds(e.bounds);
+      map.setView([e.latlng.lat, e.latlng.lng], 14)
 
       myLayer.setGeoJSON({
           type: 'Feature',
@@ -42,8 +54,3 @@
       // And hide the geolocation button
       geolocate.parentNode.removeChild(geolocate);
   });
-
-  //L.tileLayer('http://a.tiles.mapbox.com/v3/MapID/4/52.09/5.12.png', {
-  //    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-  //    maxZoom: 18
-  //}).addTo(map);
