@@ -23,7 +23,7 @@ class ThingToDo
     @longs = Set.new
     @venue_images = Set.new
     @event_images = Set.new
-    @production_titles = {}
+    @titles = {}
     @event_titles = {}
   end
 
@@ -37,10 +37,10 @@ class ThingToDo
   end
 
   def add_production_title(title)
-    titles_for_lang = @production_titles[title.language]
+    titles_for_lang = @titles[title.language]
     unless titles_for_lang
       titles_for_lang=Set.new
-      @production_titles[title.language] = titles_for_lang
+      @titles[title.language] = titles_for_lang
     end
     titles_for_lang << title
   end
@@ -63,21 +63,6 @@ class ThingToDo
       title = find_title production_titles, lang
     end
     title
-  end
-
-  def get_background_style
-    image_url = ApplicationHelper.sample event_images
-    unless image_url
-      #Try venue images if we can't find an event image
-      ApplicationHelper.sample venue_images
-    end
-
-    if image_url
-      "background-image: url(#{image_url})"
-    else
-      'background-color: #afafaf'
-      nil
-    end
   end
 
   def find_title(map, lang)

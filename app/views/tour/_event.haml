@@ -1,6 +1,14 @@
-.event{style:event.get_background_style}
-
+.event{style:ApplicationHelper::get_background_style(event)}
   - title = event.get_display_title(:en)
-  - if title
-    %h2.event-title
-      =title
+  .text
+    - if title
+      %h2.event-title
+        =title
+    .starts
+      -if Time.now - event.start < 0
+        Started
+        =distance_of_time_in_words Time.now, event.start
+        ago
+      -else
+        Starts in
+        =distance_of_time_in_words Time.now, event.start

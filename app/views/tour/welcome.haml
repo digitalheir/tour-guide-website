@@ -21,8 +21,6 @@
   var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
       .setView([52.3747158,4.8986166], 15);
 
-  // Immediately start to locate
-  map.locate();
   //if (!navigator.geolocation) {
   //    geolocate.innerHTML = 'Geolocation is not available';
   //} else {
@@ -54,3 +52,5 @@
       // And hide the geolocation button
       geolocate.parentNode.removeChild(geolocate);
   });
+  // Immediately start to locate
+  map.locate();

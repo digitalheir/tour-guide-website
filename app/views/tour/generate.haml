@@ -1,7 +1,21 @@
-- @tour.each do |node|
-  - if node.class == TravelNode
-    %h1 Travel
-    =node.duration/60
-    minutes
-  - else
-    =render partial: 'event', locals:{uri:node.uri, event:node}
+-if @tour.length > 0
+  %h1 Start
+  - map_counter = 0
+  - @tour.each do |node|
+    - if node.class == TravelNode
+      - map_counter += 1
+      .travel-node
+        .map{:id=> "map-#{map_counter}",'data-from'=> [node.from.lat, node.from.lng], 'data-to' => [node.to.lat, node.to.lng]}
+        .text
+          %h1 Travel
+          ="%.1f" % (node.duration/60)
+          minutes
+    - else
+      =render partial: 'event', locals:{uri:node.uri, event:node}
+  :javascript
+    var $maps = $('.map');
+    for(var i=0;i<$maps.length;i++){
+    var map = L.mapbox.map($maps[i], 'examples.map-i86nkdio')
+              .setView([52.3747158,4.8986166], 15);
+    }
+  %h1 End

@@ -1,8 +1,10 @@
 require 'sparql/client'
 require 'openssl'
 require 'geokit'
+require 'open-uri'
 require_relative 'sparql_queries'
 require_relative '../models/travel_node'
+require_relative '../models/venue'
 
 module TourHelper
   def self.find_events(start_time, end_time, user_location)
@@ -15,13 +17,12 @@ module TourHelper
 
     # Make query against artsholland sparql endpoint
     # If we use the SPARQL client library, the server return a status 500 for some reason
-    uri = URI('http://api.artsholland.com/sparql')
 
-    puts "Making query to #{uri}"
-    # puts query
+    puts "Making query to #{SPARQL_ENDPOINT}"
+    # make query
 
-    response = Net::HTTP.new(uri.host, uri.port).start do |http|
-      request = Net::HTTP::Post.new(uri)
+    response = Net::HTTP.new(SPARQL_ENDPOINT.host, SPARQL_ENDPOINT.port).start do |http|
+      request = Net::HTTP::Post.new(SPARQL_ENDPOINT)
       request.set_form_data({:query => query})
       request['Accept']='application/sparql-results+xml'
       http.request(request)
@@ -42,19 +43,28 @@ module TourHelper
     events
   end
 
+  def self.make_array(string_or_array)
+    if string_or_array.class == String
+      [string_or_array]
+    else
+      string_or_array
+    end
+  end
+
+  # TODO include POIs and always-open venues
   def self.generate_tour(events, tour_start, tour_end, at_location, transportation_mode=:walking)
     running_time = tour_start
 
     at_location = at_location
-    to_location = at_location # End at starting point
+    base_location = at_location # End at starting point
 
     tour = []
 
     # Add events to the tour until get_suitable_event returns nil
     travel_finish = nil
     loop do
-      # Note that events is replaced with an event that doesn't contain the selected event
-      travel_to, event, return_to_base, events = get_suitable_event(events, running_time, tour_end, at_location, to_location, transportation_mode)
+      # Note that events is replaced with an event that doesn't contain the selected production
+      travel_to, event, return_to_base, events = get_suitable_activity(events, running_time, tour_end, at_location, base_location, transportation_mode)
       if travel_to and event and return_to_base
         tour << travel_to
         tour << event
@@ -62,7 +72,7 @@ module TourHelper
         running_time += travel_to.duration # add time in seconds
         running_time += event.projected_duration # add time in seconds
 
-        at_location = event.latlng # set current location to the event location
+        at_location = event.venue.latlng # set current location to the event location
 
         travel_finish = return_to_base
       else
@@ -74,11 +84,10 @@ module TourHelper
     tour
   end
 
-  def self.get_suitable_event(events, at_time, until_end, at_location, return_location, transportation_means)
-
+  def self.get_suitable_activity(events, at_time, until_end, at_latlng, return_latlng, transportation_means)
     # Order events to distance from starting location
     events_with_distance = events.map do |event|
-      distance = at_location.distance_to(event.latlng, {units: :kms})
+      distance = at_latlng.distance_to(event.venue.latlng, {units: :kms})
       [distance, event]
     end
     events_with_distance.sort_by! do |event_with_distance|
@@ -86,31 +95,31 @@ module TourHelper
       event_with_distance[0]
     end
 
-    # travel to/from are hardcoded to 5 minutes, for now
-    travel_time_to = 5*60
-    travel_time_from = 5*60
-
     suitable_event = nil
     travel_to = nil
     return_to_base = nil
-    non_suitable = []
 
-    # Find suitable event. Prefer the closest one.
+    # Find suitable event. Prefer the closest one. # TODO prefer activity based on multidimensional function
     events_with_distance.each do |event_with_distance|
       event = event_with_distance[1]
       # Check if event duration fits in schedule
-      if !suitable_event and event.have_time(at_time, until_end, travel_time_to, travel_time_from)
-        # Get route to closest event
+      is_suitable, travel_time_to, travel_time_back = event.is_suitable_event(at_time, until_end, at_latlng, return_latlng)
+      if !suitable_event and is_suitable
+        # Get route to closest event with less than 1 hour waiting time
         suitable_event = event
-        travel_to = TravelNode.new(at_location, events_with_distance[0][1].latlng, transportation_means)
-        return_to_base = TravelNode.new(event.latlng, return_location, transportation_means)
-
-        #TODO filter for production uris
-        puts "Picked #{event.uri}"
-      else
-        non_suitable << event
+        travel_to = TravelNode.new(at_latlng, event.venue.latlng, transportation_means, travel_time_to)
+        return_to_base = TravelNode.new(event.venue.latlng, return_latlng, transportation_means, travel_time_back)
       end
     end
-    return travel_to, suitable_event, return_to_base, non_suitable
+
+    remaining_candidates = []
+    events_with_distance.each do |event_with_distance|
+      event = event_with_distance[1]
+      unless event == suitable_event or (suitable_event and event.production == suitable_event.production)
+        remaining_candidates << event
+      end
+    end
+
+    return travel_to, suitable_event, return_to_base, remaining_candidates
   end
 end
