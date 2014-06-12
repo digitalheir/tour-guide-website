@@ -66,7 +66,9 @@ module TourHelper
       # Note that events is replaced with an event that doesn't contain the selected production
       travel_to, event, return_to_base, events = get_suitable_activity(events, running_time, tour_end, at_location, base_location, transportation_mode)
       if travel_to and event and return_to_base
-        tour << travel_to
+        if travel_to.duration >= 60
+          tour << travel_to # Only add travel nodes if travel time is at least a minute
+        end
         tour << event
 
         running_time += travel_to.duration # add time in seconds
@@ -79,7 +81,9 @@ module TourHelper
         break
       end
     end
-    tour << travel_finish
+    if travel_finish
+      tour << travel_finish
+    end
 
     tour
   end
@@ -103,7 +107,7 @@ module TourHelper
     events_with_distance.each do |event_with_distance|
       event = event_with_distance[1]
       # Check if event duration fits in schedule
-      is_suitable, travel_time_to, travel_time_back = event.is_suitable_event(at_time, until_end, at_latlng, return_latlng)
+      is_suitable, travel_time_to, travel_time_back = event.is_suitable(at_time, until_end, at_latlng, return_latlng)
       if !suitable_event and is_suitable
         # Get route to closest event with less than 1 hour waiting time
         suitable_event = event

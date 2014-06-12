@@ -17,6 +17,7 @@
     -#and…
   #btn-go-container
     =submit_tag("Let's go", :id => 'btn-go')
+    -##loading-view{style: 'visibility: hidden; background:'}
 :javascript
   var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
       .setView([52.3747158,4.8986166], 15);
@@ -37,7 +38,7 @@
       var center = map.getCenter();
       var lat = center.lat;
       var lng = center.lng;
-      console.log( $('#lat'));
+      //console.log( $('#lat'));
       $('#lat')[0]['value'] = lat;
       $('#long')[0]['value'] = lng;
 

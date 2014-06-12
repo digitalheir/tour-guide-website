@@ -21,6 +21,14 @@ class Production
     @descriptions = descriptions
   end
 
+  def get_sh_description lang
+    desc = find_string_in_map(@short_descriptions, lang)
+    unless desc
+      desc = find_string_in_map(@descriptions, lang)
+    end
+    desc
+  end
+
   def self.get_productions(bounds, start_time, end_time)
     query = SparqlQueries.productions(bounds, start_time, end_time)
     puts "Query productions from #{SparqlQueries::SPARQL_ENDPOINT}"

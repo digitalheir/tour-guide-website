@@ -1,5 +1,6 @@
 require 'geokit'
 require_relative '../helpers/sparql_queries'
+include ApplicationHelper
 
 class Event
   attr_reader :uri
@@ -25,51 +26,51 @@ class Event
     @descriptions = descriptions
   end
 
+  def get_sh_description(lang)
+    #First try event itself
+    desc = find_string_in_map(@short_descriptions, lang)
+    unless desc
+      desc = find_string_in_map(@descriptions, lang)
+    end
+
+    #Then try production
+    unless desc
+      desc = @production.get_sh_description(lang)
+    end
+
+    #Then try venue
+    unless desc
+      desc = @venue.get_sh_description(lang)
+    end
+    desc
+  end
+
   def get_display_title(lang)
     title = nil
     if titles.length > 0
-      title = find_title titles, lang
+      title = find_string_in_map titles, lang
     end
     if title == nil and production.titles.length > 0
-      title = find_title production.titles, lang
+      title = find_string_in_map production.titles, lang
     end
     if title == nil and venue.titles.length > 0
-      title = find_title venue.titles, lang
+      title = find_string_in_map venue.titles, lang
     end
     title
-  end
-  def find_title(map, lang)
-    if map[lang] and map[lang].length > 0
-      ApplicationHelper.sample(map[lang])
-    else
-      if map.length > 0
-        #Get different language, preferrably English
-        if map[:en] and map[:en].length > 0
-          ApplicationHelper.sample(map[:en])
-        elsif map[nil] and map[nil].length > 0
-          ApplicationHelper.sample(map[nil])
-        else
-          map.each do |_, titles|
-            return ApplicationHelper.sample(titles)
-          end
-        end
-      else
-        # No title available in map
-        nil
-      end
-    end
   end
 
   # Returns how long this activity will probably take, in seconds.
   def projected_duration
-    if @end and @start and @end - @start > 60 # difference should be at least 1 minute, or else we won't trust it
-      @end - @start
-    else
-      30 * 60 # Hardcode at 30 minutes for now TODO make different estimates based on production (e.g., exhibit, movie)
+    max_time_spent = 3 * 60 * 60 # Maximum of 3 hours
+    duration = default_duration = 30 * 60 # default to 30 minutes #TODO make different estimates based on production (e.g., exhibit, movie)
+
+    if @end and @start and @end - @start > 60 and @end - @start < max_time_spent # difference should be at least 1 minute, or else we won't trust it
+      duration = @end - @start
     end
+    duration
   end
 
-  def is_suitable_event(from_time, until_time, from_latlng, return_latlng)
+  def is_suitable(from_time, until_time, from_latlng, return_latlng)
     travel_to = @venue.travel_time_from(from_time, from_latlng)
 
     wait_until_event_starts = @start - (from_time+travel_to) # TODO we can't walk into a movie that already started, but we *can* walk into an exhibition that has already started
@@ -80,7 +81,7 @@ class Event
     time_until_event_end = travel_to + wait_until_event_starts + projected_duration
     travel_from = @venue.travel_time_to(from_time + time_until_event_end, return_latlng)
 
-    puts "Have to wait #{wait_until_event_starts} until event starts"
+    #puts "Have to wait #{wait_until_event_starts} until event starts"
     if wait_until_event_starts > 1*60*60
       return false, travel_to, travel_from # Don't wait longer than 1 hour
     end
@@ -160,6 +161,7 @@ class Event
       end
 
       if result['shortDescription']
+        puts
         add_string(value_map[:shortDescriptions], result['shortDescription'])
       end
       if result['description']

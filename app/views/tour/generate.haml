@@ -15,7 +15,10 @@
   :javascript
     var $maps = $('.map');
     for(var i=0;i<$maps.length;i++){
-    var map = L.mapbox.map($maps[i], 'examples.map-i86nkdio')
+    //TODO set to route
+    var map = L.mapbox.map($maps[i], 'examples.map-i86nkdio', {'scrollWheelZoom': false})
               .setView([52.3747158,4.8986166], 15);
     }
   %h1 End
+- else
+  %h1 Found nothing to do.

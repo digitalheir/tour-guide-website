@@ -1,14 +1,22 @@
+- preferred_language = :en
 .event{style:ApplicationHelper::get_background_style(event)}
-  - title = event.get_display_title(:en)
+  - title = event.get_display_title(preferred_language)
   .text
     - if title
       %h2.event-title
         =title
     .starts
       -if Time.now - event.start < 0
+        Starts in
+        =distance_of_time_in_words Time.now, event.start
+      -else
         Started
         =distance_of_time_in_words Time.now, event.start
         ago
-      -else
-        Starts in
-        =distance_of_time_in_words Time.now, event.start
+    - short_description = event.get_sh_description(preferred_language)
+    - if short_description
+      .description-container
+        .info-toggle
+          .toggle-btn.opened
+        .description
+          = raw short_description
