@@ -57,6 +57,8 @@ module TourHelper
 
     at_location = at_location
     base_location = at_location # End at starting point
+    # noinspection RubyStringKeysInHashInspection
+    home = Venue.new('http://localhost/', {'en' => ['home'], 'nl'=> ['huis']}, nil, base_location, [base_location.lat], [base_location.lng])
 
     tour = []
 
@@ -64,7 +66,7 @@ module TourHelper
     travel_finish = nil
     loop do
       # Note that events is replaced with an event that doesn't contain the selected production
-      travel_to, event, return_to_base, events = get_suitable_activity(events, running_time, tour_end, at_location, base_location, transportation_mode)
+      travel_to, event, return_to_base, events = get_suitable_activity(events, running_time, tour_end, at_location, home, transportation_mode)
       if travel_to and event and return_to_base
         if travel_to.duration >= 60
           tour << travel_to # Only add travel nodes if travel time is at least a minute
@@ -88,7 +90,9 @@ module TourHelper
     tour
   end
 
-  def self.get_suitable_activity(events, at_time, until_end, at_latlng, return_latlng, transportation_means)
+  def self.get_suitable_activity(events, at_time, until_end, at_latlng, home, transportation_means)
+    return_latlng = home.latlng
+
     # Order events to distance from starting location
     events_with_distance = events.map do |event|
       distance = at_latlng.distance_to(event.venue.latlng, {units: :kms})
@@ -111,8 +115,8 @@ module TourHelper
       if !suitable_event and is_suitable
         # Get route to closest event with less than 1 hour waiting time
         suitable_event = event
-        travel_to = TravelNode.new(at_latlng, event.venue.latlng, transportation_means, travel_time_to)
-        return_to_base = TravelNode.new(event.venue.latlng, return_latlng, transportation_means, travel_time_back)
+        travel_to = TravelNode.new(at_latlng, event.venue, transportation_means, travel_time_to)
+        return_to_base = TravelNode.new(event.venue.latlng, home, transportation_means, travel_time_back)
       end
     end
 

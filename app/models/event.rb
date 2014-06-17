@@ -59,6 +59,10 @@ class Event
     title
   end
 
+  def venue_title(lang)
+    venue.get_title lang
+  end
+
   # Returns how long this activity will probably take, in seconds.
   def projected_duration
     max_time_spent = 3 * 60 * 60 # Maximum of 3 hours

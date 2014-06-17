@@ -25,6 +25,14 @@ class Venue
     desc
   end
 
+  def get_title lang
+    title=nil
+    if @titles.length > 0
+      title = find_string_in_map @titles, lang
+    end
+    title
+  end
+
   # Returns how long traveling to here will probably take, in seconds.
   # Based on a conservative walking speed of 4 km/h, multiplied by 1.1 to account for the fact that you probably can't walk in a straight line
   def travel_time(from)

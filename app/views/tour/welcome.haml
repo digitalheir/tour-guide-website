@@ -19,8 +19,10 @@
     =submit_tag("Let's go", :id => 'btn-go')
     -##loading-view{style: 'visibility: hidden; background:'}
 :javascript
-  var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
-      .setView([52.3747158,4.8986166], 15);
+
+  //var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio')
+  //    .setView([52.3747158,4.8986166], 15);
+  var map = L.mapbox.map('welcome-map', 'examples.map-i86nkdio', {center: [52.3747158,4.8986166], zoom: 15});
   var myLayer = L.mapbox.featureLayer().addTo(map);
 
   //if (!navigator.geolocation) {

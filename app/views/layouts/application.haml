@@ -5,6 +5,12 @@
     %meta{name:"viewport", content:"width=device-width, initial-scale=1, maximum-scale=1"}
     %link{href: "https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css", rel: "stylesheet"}
     %script{src: "https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.js"}
+    -#%link{href: "http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css", rel: "stylesheet"}/
+    -#/[if lte IE 8]
+    -#  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.ie.css" />
+    -#%script{src: "http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"}
+    %script{src: "http://www.mapquestapi.com/sdk/leaflet/v1.0/mq-map.js?key=Fmjtd%7Cluur2g6825%2Crn%3Do5-9a8a5z"}
+    %script{src: "http://www.mapquestapi.com/sdk/leaflet/v1.0/mq-routing.js?key=Fmjtd%7Cluur2g6825%2Crn%3Do5-9a8a5z"}
     %link{href: "http://fonts.googleapis.com/css?family=Lobster", rel: "stylesheet", type: "text/css"}
     = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => false
     = javascript_include_tag 'application', 'data-turbolinks-track' => false

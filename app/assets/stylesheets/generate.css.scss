@@ -31,6 +31,11 @@
       vertical-align: middle;
       border-radius: 3px;
       background-size: 12px;
+      &:hover{
+        cursor: pointer;
+        background-color: #eee;
+        background-color: rgba(200,200,200, 0.3);
+      }
       &.opened {
         margin-bottom: 0;
         background-image: url("data:image/svg+xml;base64\,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxhYWdfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSIzMS4yMzJweCIgaGVpZ2h0PSIyNi44OHB4IiB2aWV3Qm94PSIwIDAgMzEuMjMyIDI2Ljg4IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAzMS4yMzIgMjYuODgiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBvbHlnb24gZmlsbD0iI0ZGRkZGRiIgcG9pbnRzPSItMC4wMDEsMjYuODgxIDE1LjUxOSwwLjAwMSAzMS4wMzcsMjYuODgxICIvPg0KPC9zdmc+DQo=");
@@ -67,14 +72,14 @@
 .travel-node {
   color: #fff;
   position: relative;
-  min-height: 172px;
+  min-height: 192px;
   width: 100%;
   .text {
     h1 {
       margin: 0;
     }
-    padding-top: 110px;
-    position: relative;
+    padding-top: 10px;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;

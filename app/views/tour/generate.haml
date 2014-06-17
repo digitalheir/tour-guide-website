@@ -1,3 +1,4 @@
+- preferred_language = 'en'
 -if @tour.length > 0
   %h1 Start
   - map_counter = 0
@@ -7,17 +8,64 @@
       .travel-node
         .map{:id=> "map-#{map_counter}",'data-from'=> [node.from.lat, node.from.lng], 'data-to' => [node.to.lat, node.to.lng]}
         .text
-          %h1 Travel
+          - venue_title = node.venue_title(preferred_language)
+          - if venue_title
+            %h1
+              Travel to
+              = venue_title
+          - else
+            %h1 Travel
           ="%.1f" % (node.duration/60)
           minutes
     - else
-      =render partial: 'event', locals:{uri:node.uri, event:node}
+      =render partial: 'event', locals:{uri:node.uri, event:node, preferred_language:preferred_language}
   :javascript
     var $maps = $('.map');
     for(var i=0;i<$maps.length;i++){
     //TODO set to route
-    var map = L.mapbox.map($maps[i], 'examples.map-i86nkdio', {'scrollWheelZoom': false})
-              .setView([52.3747158,4.8986166], 15);
+    //var map = L.mapbox.map
+    //(, 'examples.map-i86nkdio', {})
+    //          .setView([], 15);
+    var $map = $($maps[i]);
+
+    //console.log($map.attr('data-from'));
+    //console.log($map.attr('data-to'));
+
+    var from = JSON.parse($map.attr('data-from'));
+    var to = JSON.parse($map.attr('data-to'));
+
+    //console.log(from);
+    //console.log(to);
+
+    var avLat = (from[0] + to[0]) / 2;
+    var avLong = (from[1] + to[1]) / 2;
+
+    var map = L.mapbox.map($map[0], 'examples.map-i86nkdio', {
+                   scrollWheelZoom: false,
+                   center: [ avLat, avLong ],
+                   zoom: 15
+               });
+    var dir = MQ.routing.directions();
+    dir.route({
+                   locations: [
+                     { latLng: { lat: from[0], lng: from[1] } },
+                     { latLng: { lat: to[0], lng: to[1] } }
+                   ],
+                   options: {routeType: 'pedestrian'}
+              });
+    var routeLayer = MQ.routing.routeLayer({
+                   directions: dir,
+                   fitBounds: true,
+                   ribbonOptions: {
+                     draggable: false,
+                     //ribbonDisplay: { color: '#CC0000', opacity: 0.3 },
+                     //widths: [ 15, 15, 15, 15, 14, 13, 12, 12, 12, 11, 11, 11, 11, 12, 13, 14, 15 ]
+                   }
+                 });
+    //routeLayer.callback(function(){
+    //  map.setZoom(Math.max(map.getZoom() - 1, 1))
+    //});
+    map.addLayer(routeLayer);
     }
   %h1 End
 - else
